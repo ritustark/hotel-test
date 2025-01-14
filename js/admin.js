@@ -7,17 +7,37 @@ let menuData = {
 
 // Initialize from localStorage if available
 function initializeData() {
-    const savedData = localStorage.getItem('restaurantData');
-    if (savedData) {
-        menuData = JSON.parse(savedData);
-        renderCategories();
-        renderTables();
+    try {
+        const savedData = localStorage.getItem('restaurantData');
+        console.log('Loading saved data:', savedData);
+        
+        if (savedData) {
+            menuData = JSON.parse(savedData);
+            console.log('Initialized menu data:', menuData);
+            renderCategories();
+            renderTables();
+        } else {
+            console.log('No existing data found, starting fresh');
+            saveData(); // Save initial empty state
+        }
+    } catch (error) {
+        console.error('Error initializing data:', error);
     }
 }
 
 // Save data to localStorage
 function saveData() {
-    localStorage.setItem('restaurantData', JSON.stringify(menuData));
+    try {
+        localStorage.setItem('restaurantData', JSON.stringify(menuData));
+        console.log('Saved menu data:', menuData);
+        
+        // Verify the save
+        const savedData = localStorage.getItem('restaurantData');
+        console.log('Verification - Read saved data:', savedData);
+    } catch (error) {
+        console.error('Error saving data:', error);
+        alert('Error saving menu data. Please try again.');
+    }
 }
 
 // Show/Hide sections
@@ -44,9 +64,13 @@ function showAddCategoryModal() {
 
 function addCategory() {
     const categoryName = document.getElementById('categoryName').value.trim();
+    console.log('Adding category:', categoryName);
+    
     if (categoryName && !menuData.categories.includes(categoryName)) {
         menuData.categories.push(categoryName);
         menuData.dishes[categoryName] = [];
+        console.log('Updated menu data after adding category:', menuData);
+        
         saveData();
         renderCategories();
         
@@ -54,6 +78,8 @@ function addCategory() {
         const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
         modal.hide();
         document.getElementById('categoryForm').reset();
+    } else {
+        console.log('Invalid category name or category already exists');
     }
 }
 
@@ -105,15 +131,23 @@ function addDish() {
     const description = document.getElementById('dishDescription').value.trim();
     const imageUrl = document.getElementById('dishImage').value.trim();
     
+    console.log('Adding dish:', { name, price, description, imageUrl, category: currentCategory });
+    
     if (name && price && description) {
         const dish = {
             name,
             price: parseFloat(price),
             description,
-            imageUrl: imageUrl || 'default-dish-image.jpg'
+            imageUrl: imageUrl || 'https://via.placeholder.com/300x200'
         };
         
+        if (!menuData.dishes[currentCategory]) {
+            menuData.dishes[currentCategory] = [];
+        }
+        
         menuData.dishes[currentCategory].push(dish);
+        console.log('Updated menu data after adding dish:', menuData);
+        
         saveData();
         renderCategories();
         
@@ -121,6 +155,8 @@ function addDish() {
         const modal = bootstrap.Modal.getInstance(document.getElementById('addDishModal'));
         modal.hide();
         document.getElementById('dishForm').reset();
+    } else {
+        console.log('Invalid dish data');
     }
 }
 

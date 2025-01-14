@@ -5,60 +5,96 @@ let tableNumber = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Menu page initialized');
+    
     // Get table number from URL
     const urlParams = new URLSearchParams(window.location.search);
     tableNumber = urlParams.get('table');
+    console.log('Table number:', tableNumber);
+    
     if (tableNumber) {
         document.getElementById('tableNumber').textContent = tableNumber;
     }
 
     // Load menu data
     loadMenuData();
+
+    // Add storage event listener to update menu when data changes
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'restaurantData') {
+            console.log('Menu data updated in another tab');
+            loadMenuData();
+        }
+    });
 });
 
 // Load menu data from localStorage
 function loadMenuData() {
     try {
+        // Debug: Log all localStorage keys
+        console.log('All localStorage keys:', Object.keys(localStorage));
+        
         const savedData = localStorage.getItem('restaurantData');
-        console.log('Raw saved data:', savedData); // Debug log
+        console.log('Raw saved data:', savedData);
 
         if (!savedData) {
             console.log('No menu data found in localStorage');
-            showNoMenuMessage();
+            showNoMenuMessage('No menu data available');
             return;
         }
 
-        menuData = JSON.parse(savedData);
-        console.log('Parsed menu data:', menuData); // Debug log
+        try {
+            menuData = JSON.parse(savedData);
+            console.log('Parsed menu data:', menuData);
 
-        if (!menuData || !menuData.categories || !menuData.dishes) {
-            console.log('Invalid menu data structure:', menuData);
-            showNoMenuMessage();
-            return;
+            if (!menuData || typeof menuData !== 'object') {
+                showNoMenuMessage('Invalid menu data format');
+                return;
+            }
+
+            if (!menuData.categories || !Array.isArray(menuData.categories)) {
+                console.log('No categories array found');
+                showNoMenuMessage('Menu structure is invalid');
+                return;
+            }
+
+            if (!menuData.dishes || typeof menuData.dishes !== 'object') {
+                console.log('No dishes object found');
+                showNoMenuMessage('Menu items are invalid');
+                return;
+            }
+
+            console.log('Categories found:', menuData.categories);
+            console.log('Dishes:', menuData.dishes);
+
+            if (menuData.categories.length === 0) {
+                showNoMenuMessage('No menu categories available');
+                return;
+            }
+
+            renderMenu();
+        } catch (parseError) {
+            console.error('Error parsing menu data:', parseError);
+            showNoMenuMessage('Error loading menu data');
         }
-
-        if (menuData.categories.length === 0) {
-            console.log('No categories found in menu data');
-            showNoMenuMessage();
-            return;
-        }
-
-        console.log('Categories found:', menuData.categories);
-        console.log('Dishes:', menuData.dishes);
-
-        renderMenu();
     } catch (error) {
-        console.error('Error loading menu data:', error);
-        showNoMenuMessage();
+        console.error('Error accessing localStorage:', error);
+        showNoMenuMessage('Error accessing menu data');
     }
 }
 
-function showNoMenuMessage() {
+function showNoMenuMessage(message = 'Menu Not Available') {
     const menuContainer = document.getElementById('menuCategories');
     menuContainer.innerHTML = `
         <div class="alert alert-info text-center" role="alert">
-            <h4 class="alert-heading">Menu Not Available</h4>
+            <h4 class="alert-heading">${message}</h4>
             <p>Please ask the staff to update the menu.</p>
+            <hr>
+            <p class="mb-0">
+                <button onclick="loadMenuData()" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh Menu
+                </button>
+            </p>
         </div>
     `;
 }
