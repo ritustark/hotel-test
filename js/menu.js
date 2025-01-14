@@ -18,24 +18,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load menu data from localStorage
 function loadMenuData() {
-    const savedData = localStorage.getItem('restaurantData');
-    console.log('Loaded menu data:', savedData); // Debug log
-    if (savedData) {
-        try {
-            menuData = JSON.parse(savedData);
-            if (menuData && menuData.categories && menuData.dishes) {
-                renderMenu();
-            } else {
-                console.error('Invalid menu data structure');
-                document.getElementById('menuCategories').innerHTML = '<p class="text-center">Menu is being updated. Please check back later.</p>';
-            }
-        } catch (e) {
-            console.error('Error parsing menu data:', e);
-            document.getElementById('menuCategories').innerHTML = '<p class="text-center">Error loading menu. Please try again later.</p>';
+    try {
+        const savedData = localStorage.getItem('restaurantData');
+        console.log('Raw saved data:', savedData); // Debug log
+
+        if (!savedData) {
+            console.log('No menu data found in localStorage');
+            showNoMenuMessage();
+            return;
         }
-    } else {
-        document.getElementById('menuCategories').innerHTML = '<p class="text-center">No menu items available. Please check back later.</p>';
+
+        menuData = JSON.parse(savedData);
+        console.log('Parsed menu data:', menuData); // Debug log
+
+        if (!menuData || !menuData.categories || !menuData.dishes) {
+            console.log('Invalid menu data structure:', menuData);
+            showNoMenuMessage();
+            return;
+        }
+
+        if (menuData.categories.length === 0) {
+            console.log('No categories found in menu data');
+            showNoMenuMessage();
+            return;
+        }
+
+        console.log('Categories found:', menuData.categories);
+        console.log('Dishes:', menuData.dishes);
+
+        renderMenu();
+    } catch (error) {
+        console.error('Error loading menu data:', error);
+        showNoMenuMessage();
     }
+}
+
+function showNoMenuMessage() {
+    const menuContainer = document.getElementById('menuCategories');
+    menuContainer.innerHTML = `
+        <div class="alert alert-info text-center" role="alert">
+            <h4 class="alert-heading">Menu Not Available</h4>
+            <p>Please ask the staff to update the menu.</p>
+        </div>
+    `;
 }
 
 // Render the menu
@@ -43,15 +68,13 @@ function renderMenu() {
     const menuContainer = document.getElementById('menuCategories');
     menuContainer.innerHTML = '';
 
-    if (!menuData.categories || menuData.categories.length === 0) {
-        menuContainer.innerHTML = '<p class="text-center">No menu categories available.</p>';
-        return;
-    }
-
     menuData.categories.forEach(category => {
-        if (menuData.dishes[category] && menuData.dishes[category].length > 0) {
+        const dishes = menuData.dishes[category];
+        console.log(`Rendering category: ${category}, Dishes:`, dishes); // Debug log
+
+        if (dishes && dishes.length > 0) {
             const categorySection = document.createElement('div');
-            categorySection.className = 'category-section';
+            categorySection.className = 'category-section mb-4';
             categorySection.innerHTML = `
                 <h2 class="category-title">${category}</h2>
                 <div class="row">
@@ -61,14 +84,22 @@ function renderMenu() {
             menuContainer.appendChild(categorySection);
         }
     });
+
+    // If no categories were rendered, show message
+    if (menuContainer.children.length === 0) {
+        showNoMenuMessage();
+    }
 }
 
 // Render dishes for a category
 function renderDishesForCategory(category) {
     return menuData.dishes[category].map(dish => `
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-4 mb-3">
             <div class="dish-card">
-                <img src="${dish.imageUrl}" alt="${dish.name}" class="dish-image">
+                <img src="${dish.imageUrl || 'https://via.placeholder.com/300x200'}" 
+                     alt="${dish.name}" 
+                     class="dish-image"
+                     onerror="this.src='https://via.placeholder.com/300x200'">
                 <div class="card-body p-3">
                     <h5 class="card-title">${dish.name}</h5>
                     <p class="card-text">${dish.description}</p>
@@ -121,7 +152,11 @@ function updateQuantity(category, dishName, change) {
 // Toggle cart visibility
 function toggleCart() {
     const cartContainer = document.getElementById('cartContainer');
-    cartContainer.style.display = cartContainer.style.display === 'none' ? 'block' : 'none';
+    if (cartContainer.style.display === 'none' || !cartContainer.style.display) {
+        cartContainer.style.display = 'block';
+    } else {
+        cartContainer.style.display = 'none';
+    }
 }
 
 // Update cart UI
