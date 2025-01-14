@@ -19,9 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load menu data from localStorage
 function loadMenuData() {
     const savedData = localStorage.getItem('restaurantData');
+    console.log('Loaded menu data:', savedData); // Debug log
     if (savedData) {
-        menuData = JSON.parse(savedData);
-        renderMenu();
+        try {
+            menuData = JSON.parse(savedData);
+            if (menuData && menuData.categories && menuData.dishes) {
+                renderMenu();
+            } else {
+                console.error('Invalid menu data structure');
+                document.getElementById('menuCategories').innerHTML = '<p class="text-center">Menu is being updated. Please check back later.</p>';
+            }
+        } catch (e) {
+            console.error('Error parsing menu data:', e);
+            document.getElementById('menuCategories').innerHTML = '<p class="text-center">Error loading menu. Please try again later.</p>';
+        }
+    } else {
+        document.getElementById('menuCategories').innerHTML = '<p class="text-center">No menu items available. Please check back later.</p>';
     }
 }
 
@@ -30,16 +43,23 @@ function renderMenu() {
     const menuContainer = document.getElementById('menuCategories');
     menuContainer.innerHTML = '';
 
+    if (!menuData.categories || menuData.categories.length === 0) {
+        menuContainer.innerHTML = '<p class="text-center">No menu categories available.</p>';
+        return;
+    }
+
     menuData.categories.forEach(category => {
-        const categorySection = document.createElement('div');
-        categorySection.className = 'category-section';
-        categorySection.innerHTML = `
-            <h2 class="category-title">${category}</h2>
-            <div class="row">
-                ${renderDishesForCategory(category)}
-            </div>
-        `;
-        menuContainer.appendChild(categorySection);
+        if (menuData.dishes[category] && menuData.dishes[category].length > 0) {
+            const categorySection = document.createElement('div');
+            categorySection.className = 'category-section';
+            categorySection.innerHTML = `
+                <h2 class="category-title">${category}</h2>
+                <div class="row">
+                    ${renderDishesForCategory(category)}
+                </div>
+            `;
+            menuContainer.appendChild(categorySection);
+        }
     });
 }
 
@@ -109,10 +129,14 @@ function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
     const cartCount = document.getElementById('cartCount');
     const cartTotal = document.getElementById('cartTotal');
+    const cartBadge = document.querySelector('.cart-badge');
     
     // Update cart count
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartCount.textContent = totalItems;
+    
+    // Show/hide cart badge and update its position
+    cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
     
     // Update cart items
     cartItems.innerHTML = cart.map(item => `
@@ -135,8 +159,11 @@ function updateCartUI() {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     cartTotal.textContent = total.toFixed(2);
     
-    // Show/hide cart badge
-    document.querySelector('.cart-badge').style.display = totalItems > 0 ? 'flex' : 'none';
+    // Show cart container if there are items
+    const cartContainer = document.getElementById('cartContainer');
+    if (totalItems > 0 && cartContainer.style.display === 'none') {
+        cartContainer.style.display = 'block';
+    }
 }
 
 // Place order
