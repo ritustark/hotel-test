@@ -5,12 +5,17 @@ let tableNumber = null;
 
 // Get base URL for data sharing
 function getBaseUrl() {
-    return 'https://ritustark.github.io/hotel-look';
+    // Get the repository name from the URL
+    const pathArray = window.location.pathname.split('/');
+    const repoName = pathArray[1]; // This will be 'hotel-look'
+    return `${window.location.protocol}//${window.location.host}/${repoName}`;
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Menu page initialized');
+    console.log('Current URL:', window.location.href);
+    console.log('Base URL:', getBaseUrl());
     
     // Get table number from URL
     const urlParams = new URLSearchParams(window.location.search);

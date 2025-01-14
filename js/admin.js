@@ -7,7 +7,10 @@ let menuData = {
 
 // Get GitHub Pages base URL
 function getBaseUrl() {
-    return 'https://ritustark.github.io/hotel-look';
+    // Get the repository name from the URL
+    const pathArray = window.location.pathname.split('/');
+    const repoName = pathArray[1]; // This will be 'hotel-look'
+    return `${window.location.protocol}//${window.location.host}/${repoName}`;
 }
 
 // Initialize from localStorage if available
@@ -346,8 +349,9 @@ function deleteTable(tableNumber) {
 }
 
 function generateQRCodeUrl(tableNumber) {
-    // Use absolute GitHub Pages URL
-    return `${getBaseUrl()}/menu.html?table=${tableNumber}`;
+    const baseUrl = getBaseUrl();
+    console.log('Generating QR URL with base:', baseUrl);
+    return `${baseUrl}/menu.html?table=${tableNumber}`;
 }
 
 // QR Code Management
