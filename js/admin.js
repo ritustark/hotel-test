@@ -8,7 +8,7 @@ let menuData = {
 // Initialize from localStorage if available
 function initializeData() {
     try {
-        const savedData = localStorage.getItem('restaurantData');
+        const savedData = localStorage.getItem('menuData');
         console.log('Loading saved data:', savedData);
         
         if (savedData) {
@@ -27,7 +27,6 @@ function initializeData() {
         saveData(); // Save initial state
     } catch (error) {
         console.error('Error initializing data:', error);
-        // Reset to default state if error occurs
         menuData = {
             categories: [],
             dishes: {},
@@ -40,20 +39,18 @@ function initializeData() {
 // Save data to localStorage
 function saveData() {
     try {
-        console.log('Saving menu data:', menuData);
-        localStorage.setItem('restaurantData', JSON.stringify(menuData));
+        // Save menu data separately
+        localStorage.setItem('menuData', JSON.stringify(menuData));
+        localStorage.setItem('lastUpdated', new Date().toISOString());
         
-        // Verify the save was successful
-        const savedData = localStorage.getItem('restaurantData');
-        if (!savedData) {
-            throw new Error('Data was not saved properly');
-        }
+        // Force update for other windows/tabs
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'menuData',
+            newValue: JSON.stringify(menuData),
+            url: window.location.href
+        }));
         
-        // Log success
-        console.log('Data saved successfully');
-        
-        // Force a storage event for other tabs
-        window.dispatchEvent(new Event('storage'));
+        console.log('Data saved successfully:', menuData);
     } catch (error) {
         console.error('Error saving data:', error);
         alert('Error saving menu data. Please try again.');
@@ -79,7 +76,7 @@ function getBaseUrl() {
 // Category Management
 function showAddCategoryModal() {
     const modal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
-    document.getElementById('categoryName').value = ''; // Clear previous input
+    document.getElementById('categoryName').value = '';
     modal.show();
 }
 
@@ -88,38 +85,27 @@ function addCategory() {
         const categoryInput = document.getElementById('categoryName');
         const categoryName = categoryInput.value.trim();
         
-        console.log('Attempting to add category:', categoryName);
-        
-        // Validate input
         if (!categoryName) {
             alert('Please enter a category name');
             return;
         }
         
-        // Check for duplicates
         if (menuData.categories.includes(categoryName)) {
             alert('This category already exists');
             return;
         }
         
-        // Add the category
         menuData.categories.push(categoryName);
         menuData.dishes[categoryName] = [];
         
-        console.log('Updated menu data:', menuData);
-        
-        // Save changes
         saveData();
-        
-        // Update UI
         renderCategories();
         
-        // Close modal and reset form
         const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
         modal.hide();
         categoryInput.value = '';
         
-        console.log('Category added successfully');
+        console.log('Category added successfully:', categoryName);
     } catch (error) {
         console.error('Error adding category:', error);
         alert('Error adding category. Please try again.');
@@ -129,17 +115,8 @@ function addCategory() {
 function renderCategories() {
     try {
         const categoriesList = document.getElementById('categoriesList');
-        if (!categoriesList) {
-            console.error('Categories list element not found');
-            return;
-        }
-        
-        console.log('Rendering categories:', menuData.categories);
-        
-        // Clear existing content
         categoriesList.innerHTML = '';
         
-        // Show message if no categories
         if (!menuData.categories || menuData.categories.length === 0) {
             categoriesList.innerHTML = `
                 <div class="col-12">
@@ -151,7 +128,6 @@ function renderCategories() {
             return;
         }
         
-        // Render each category
         menuData.categories.forEach(category => {
             const dishCount = menuData.dishes[category] ? menuData.dishes[category].length : 0;
             const categoryCard = document.createElement('div');
@@ -177,8 +153,6 @@ function renderCategories() {
             `;
             categoriesList.appendChild(categoryCard);
         });
-        
-        console.log('Categories rendered successfully');
     } catch (error) {
         console.error('Error rendering categories:', error);
         alert('Error displaying categories. Please refresh the page.');

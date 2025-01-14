@@ -19,64 +19,64 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load menu data
     loadMenuData();
 
-    // Add storage event listener to update menu when data changes
+    // Add storage event listener
     window.addEventListener('storage', (e) => {
-        if (e.key === 'restaurantData') {
-            console.log('Menu data updated in another tab');
+        if (e.key === 'menuData') {
+            console.log('Menu data updated, reloading...');
             loadMenuData();
         }
     });
+
+    // Set up periodic refresh
+    setInterval(loadMenuData, 30000); // Refresh every 30 seconds
 });
 
 // Load menu data from localStorage
 function loadMenuData() {
     try {
-        // Clear any existing data
-        menuData = null;
+        console.log('Loading menu data...');
         
         // Get data from localStorage
-        const savedData = localStorage.getItem('restaurantData');
-        console.log('Loading menu data from localStorage');
+        const savedData = localStorage.getItem('menuData');
+        const lastUpdated = localStorage.getItem('lastUpdated');
         
         if (!savedData) {
-            console.warn('No menu data found in localStorage');
+            console.warn('No menu data found');
             showNoMenuMessage('Menu data not found');
             return;
         }
 
         // Parse the saved data
-        menuData = JSON.parse(savedData);
+        const newMenuData = JSON.parse(savedData);
         
         // Validate the data structure
-        if (!menuData || !menuData.categories || !menuData.dishes) {
-            console.error('Invalid menu data structure:', menuData);
+        if (!newMenuData || !newMenuData.categories || !newMenuData.dishes) {
+            console.error('Invalid menu data structure:', newMenuData);
             showNoMenuMessage('Invalid menu data');
             return;
         }
 
-        // Log the loaded data
-        console.log('Loaded menu data:', {
-            categories: menuData.categories,
-            dishesCount: Object.keys(menuData.dishes).length
-        });
-
-        // Check if we have any categories
-        if (menuData.categories.length === 0) {
+        // Check if we have any categories and dishes
+        if (newMenuData.categories.length === 0) {
             showNoMenuMessage('No menu categories available');
             return;
         }
 
-        // Check if we have any dishes
-        const totalDishes = Object.values(menuData.dishes).reduce((sum, dishes) => sum + dishes.length, 0);
+        const totalDishes = Object.values(newMenuData.dishes).reduce((sum, dishes) => sum + dishes.length, 0);
         if (totalDishes === 0) {
             showNoMenuMessage('No dishes available');
             return;
         }
 
-        // Render the menu
-        renderMenu();
+        // Update menu data and render
+        menuData = newMenuData;
+        console.log('Menu data loaded successfully:', {
+            categories: menuData.categories.length,
+            dishes: totalDishes,
+            lastUpdated: lastUpdated
+        });
         
-        // Update any existing cart items
+        renderMenu();
         updateCartUI();
         
     } catch (error) {
