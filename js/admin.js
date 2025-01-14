@@ -13,9 +13,18 @@ function getBaseUrl() {
 // Initialize from localStorage if available
 function initializeData() {
     try {
-        // Try to load data from both keys for compatibility
-        const savedData = localStorage.getItem('hotel-look-menu') || localStorage.getItem('menuData');
-        console.log('Loading saved data:', savedData);
+        // Try to load data from all possible storage keys
+        const keys = ['hotel-look-menu', 'menuData', 'restaurantData'];
+        let savedData = null;
+        
+        for (const key of keys) {
+            const data = localStorage.getItem(key);
+            if (data) {
+                console.log(`Found data in ${key}`);
+                savedData = data;
+                break;
+            }
+        }
         
         if (savedData) {
             menuData = JSON.parse(savedData);
@@ -28,9 +37,13 @@ function initializeData() {
                 tables: []
             };
         }
+        
+        // Save to ensure data is in all storage locations
+        saveData();
+        
+        // Render UI
         renderCategories();
         renderTables();
-        saveData(); // Save initial state
     } catch (error) {
         console.error('Error initializing data:', error);
         menuData = {
@@ -45,13 +58,24 @@ function initializeData() {
 // Save data to localStorage
 function saveData() {
     try {
-        // Save menu data with a unique key for this application
         const dataToSave = JSON.stringify(menuData);
-        localStorage.setItem('hotel-look-menu', dataToSave);
+        
+        // Save to all storage keys for compatibility
+        const storageKeys = [
+            'hotel-look-menu',
+            'menuData',
+            'restaurantData'
+        ];
+        
+        storageKeys.forEach(key => {
+            localStorage.setItem(key, dataToSave);
+            console.log(`Saved data to ${key}`);
+        });
+        
+        // Save timestamp
         localStorage.setItem('hotel-look-lastUpdated', new Date().toISOString());
         
-        // Save to both keys for compatibility
-        localStorage.setItem('menuData', dataToSave);
+        console.log('Data saved successfully:', menuData);
         
         // Force update for other windows/tabs
         window.dispatchEvent(new StorageEvent('storage', {
@@ -59,8 +83,6 @@ function saveData() {
             newValue: dataToSave,
             url: window.location.href
         }));
-        
-        console.log('Data saved successfully:', menuData);
     } catch (error) {
         console.error('Error saving data:', error);
         alert('Error saving menu data. Please try again.');

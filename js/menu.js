@@ -3,6 +3,11 @@ let menuData = null;
 let cart = [];
 let tableNumber = null;
 
+// Get base URL for data sharing
+function getBaseUrl() {
+    return 'https://ritustark.github.io/hotel-look';
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Menu page initialized');
@@ -19,31 +24,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load menu data
     loadMenuData();
 
-    // Add storage event listener
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'hotel-look-menu' || e.key === 'menuData') {
-            console.log('Menu data updated, reloading...');
-            loadMenuData();
-        }
-    });
-
     // Set up periodic refresh
-    setInterval(loadMenuData, 10000); // Refresh every 10 seconds
+    setInterval(loadMenuData, 5000); // Refresh every 5 seconds
 });
 
-// Load menu data from localStorage
+// Load menu data from all possible storage locations
 function loadMenuData() {
     try {
-        console.log('Loading menu data...');
+        console.log('Attempting to load menu data...');
         
-        // Try both storage keys
-        const savedData = localStorage.getItem('hotel-look-menu') || localStorage.getItem('menuData');
-        const lastUpdated = localStorage.getItem('hotel-look-lastUpdated') || localStorage.getItem('lastUpdated');
+        // Try all possible storage keys
+        const keys = [
+            'hotel-look-menu',
+            'menuData',
+            'restaurantData'
+        ];
         
-        console.log('Saved data found:', savedData ? 'yes' : 'no');
+        let savedData = null;
+        for (const key of keys) {
+            const data = localStorage.getItem(key);
+            if (data) {
+                console.log(`Found data in ${key}`);
+                savedData = data;
+                break;
+            }
+        }
         
         if (!savedData) {
-            console.warn('No menu data found');
+            console.warn('No menu data found in any storage location');
             showNoMenuMessage('Menu data not found');
             return;
         }
@@ -79,8 +87,7 @@ function loadMenuData() {
         menuData = newMenuData;
         console.log('Menu data loaded successfully:', {
             categories: menuData.categories.length,
-            dishes: totalDishes,
-            lastUpdated: lastUpdated
+            dishes: totalDishes
         });
         
         renderMenu();
@@ -88,7 +95,7 @@ function loadMenuData() {
         
     } catch (error) {
         console.error('Error loading menu data:', error);
-        showNoMenuMessage('Error loading menu');
+        showNoMenuMessage('Error loading menu. Please try refreshing.');
     }
 }
 
