@@ -184,6 +184,23 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYrcJmNxZEsMBHrF26-eQwW8oWEgXVgxU",
+            authDomain: "hotel-menu-qr.firebaseapp.com",
+            databaseURL: "https://hotel-menu-qr-default-rtdb.firebaseio.com",
+            projectId: "hotel-menu-qr",
+            storageBucket: "hotel-menu-qr.appspot.com",
+            messagingSenderId: "339586271174",
+            appId: "1:339586271174:web:9b9e5d8a58bd2c2b8e9673"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="js/admin.js"></script>

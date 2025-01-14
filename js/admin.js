@@ -5,35 +5,36 @@ let menuData = {
     tables: []
 };
 
-// Initialize from localStorage if available
+// Initialize from Firebase
 function initializeData() {
     try {
-        const savedData = localStorage.getItem('restaurantData');
-        console.log('Loading saved data:', savedData);
+        // Get reference to menu data
+        const menuRef = firebase.database().ref('menuData');
         
-        if (savedData) {
-            menuData = JSON.parse(savedData);
-            console.log('Initialized menu data:', menuData);
-            renderCategories();
-            renderTables();
-        } else {
-            console.log('No existing data found, starting fresh');
-            saveData(); // Save initial empty state
-        }
+        // Listen for changes
+        menuRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                menuData = data;
+                console.log('Loaded menu data from Firebase:', menuData);
+                renderCategories();
+                renderTables();
+            } else {
+                console.log('No existing data found, starting fresh');
+                saveData();
+            }
+        });
     } catch (error) {
         console.error('Error initializing data:', error);
     }
 }
 
-// Save data to localStorage
+// Save data to Firebase
 function saveData() {
     try {
-        localStorage.setItem('restaurantData', JSON.stringify(menuData));
-        console.log('Saved menu data:', menuData);
-        
-        // Verify the save
-        const savedData = localStorage.getItem('restaurantData');
-        console.log('Verification - Read saved data:', savedData);
+        const menuRef = firebase.database().ref('menuData');
+        menuRef.set(menuData);
+        console.log('Saved menu data to Firebase:', menuData);
     } catch (error) {
         console.error('Error saving data:', error);
         alert('Error saving menu data. Please try again.');

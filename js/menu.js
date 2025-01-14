@@ -16,41 +16,28 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('tableNumber').textContent = tableNumber;
     }
 
-    // Load menu data
+    // Load menu data from Firebase
     loadMenuData();
-
-    // Add storage event listener to update menu when data changes
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'restaurantData') {
-            console.log('Menu data updated in another tab');
-            loadMenuData();
-        }
-    });
 });
 
-// Load menu data from localStorage
+// Load menu data from Firebase
 function loadMenuData() {
     try {
-        // Debug: Log all localStorage keys
-        console.log('All localStorage keys:', Object.keys(localStorage));
+        const menuRef = firebase.database().ref('menuData');
         
-        const savedData = localStorage.getItem('restaurantData');
-        console.log('Raw saved data:', savedData);
-
-        if (!savedData) {
-            console.log('No menu data found in localStorage');
-            showNoMenuMessage('No menu data available');
-            return;
-        }
-
-        try {
-            menuData = JSON.parse(savedData);
-            console.log('Parsed menu data:', menuData);
-
-            if (!menuData || typeof menuData !== 'object') {
-                showNoMenuMessage('Invalid menu data format');
+        // Listen for changes
+        menuRef.on('value', (snapshot) => {
+            console.log('Received Firebase data update');
+            const data = snapshot.val();
+            
+            if (!data) {
+                console.log('No menu data found in Firebase');
+                showNoMenuMessage('No menu data available');
                 return;
             }
+
+            menuData = data;
+            console.log('Loaded menu data:', menuData);
 
             if (!menuData.categories || !Array.isArray(menuData.categories)) {
                 console.log('No categories array found');
@@ -64,22 +51,16 @@ function loadMenuData() {
                 return;
             }
 
-            console.log('Categories found:', menuData.categories);
-            console.log('Dishes:', menuData.dishes);
-
             if (menuData.categories.length === 0) {
                 showNoMenuMessage('No menu categories available');
                 return;
             }
 
             renderMenu();
-        } catch (parseError) {
-            console.error('Error parsing menu data:', parseError);
-            showNoMenuMessage('Error loading menu data');
-        }
+        });
     } catch (error) {
-        console.error('Error accessing localStorage:', error);
-        showNoMenuMessage('Error accessing menu data');
+        console.error('Error loading menu data:', error);
+        showNoMenuMessage('Error loading menu data');
     }
 }
 
