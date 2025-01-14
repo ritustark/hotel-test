@@ -5,10 +5,16 @@ let menuData = {
     tables: []
 };
 
+// Get GitHub Pages base URL
+function getBaseUrl() {
+    return 'https://ritustark.github.io/hotel-look';
+}
+
 // Initialize from localStorage if available
 function initializeData() {
     try {
-        const savedData = localStorage.getItem('menuData');
+        // Try to load data from both keys for compatibility
+        const savedData = localStorage.getItem('hotel-look-menu') || localStorage.getItem('menuData');
         console.log('Loading saved data:', savedData);
         
         if (savedData) {
@@ -39,14 +45,18 @@ function initializeData() {
 // Save data to localStorage
 function saveData() {
     try {
-        // Save menu data separately
-        localStorage.setItem('menuData', JSON.stringify(menuData));
-        localStorage.setItem('lastUpdated', new Date().toISOString());
+        // Save menu data with a unique key for this application
+        const dataToSave = JSON.stringify(menuData);
+        localStorage.setItem('hotel-look-menu', dataToSave);
+        localStorage.setItem('hotel-look-lastUpdated', new Date().toISOString());
+        
+        // Save to both keys for compatibility
+        localStorage.setItem('menuData', dataToSave);
         
         // Force update for other windows/tabs
         window.dispatchEvent(new StorageEvent('storage', {
-            key: 'menuData',
-            newValue: JSON.stringify(menuData),
+            key: 'hotel-look-menu',
+            newValue: dataToSave,
             url: window.location.href
         }));
         
@@ -63,14 +73,6 @@ function showSection(sectionId) {
         section.classList.add('d-none');
     });
     document.getElementById(sectionId).classList.remove('d-none');
-}
-
-// Get GitHub Pages base URL
-function getBaseUrl() {
-    // Get the repository name from the URL
-    const pathArray = window.location.pathname.split('/');
-    const repoName = pathArray[1]; // This will be your repository name
-    return `${window.location.protocol}//${window.location.host}/${repoName}`;
 }
 
 // Category Management
@@ -286,7 +288,7 @@ function deleteTable(tableNumber) {
 }
 
 function generateQRCodeUrl(tableNumber) {
-    // Use GitHub Pages URL
+    // Use absolute GitHub Pages URL
     return `${getBaseUrl()}/menu.html?table=${tableNumber}`;
 }
 

@@ -21,14 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add storage event listener
     window.addEventListener('storage', (e) => {
-        if (e.key === 'menuData') {
+        if (e.key === 'hotel-look-menu' || e.key === 'menuData') {
             console.log('Menu data updated, reloading...');
             loadMenuData();
         }
     });
 
     // Set up periodic refresh
-    setInterval(loadMenuData, 30000); // Refresh every 30 seconds
+    setInterval(loadMenuData, 10000); // Refresh every 10 seconds
 });
 
 // Load menu data from localStorage
@@ -36,9 +36,11 @@ function loadMenuData() {
     try {
         console.log('Loading menu data...');
         
-        // Get data from localStorage
-        const savedData = localStorage.getItem('menuData');
-        const lastUpdated = localStorage.getItem('lastUpdated');
+        // Try both storage keys
+        const savedData = localStorage.getItem('hotel-look-menu') || localStorage.getItem('menuData');
+        const lastUpdated = localStorage.getItem('hotel-look-lastUpdated') || localStorage.getItem('lastUpdated');
+        
+        console.log('Saved data found:', savedData ? 'yes' : 'no');
         
         if (!savedData) {
             console.warn('No menu data found');
@@ -48,6 +50,7 @@ function loadMenuData() {
 
         // Parse the saved data
         const newMenuData = JSON.parse(savedData);
+        console.log('Parsed menu data:', newMenuData);
         
         // Validate the data structure
         if (!newMenuData || !newMenuData.categories || !newMenuData.dishes) {
@@ -58,12 +61,16 @@ function loadMenuData() {
 
         // Check if we have any categories and dishes
         if (newMenuData.categories.length === 0) {
+            console.warn('No categories found');
             showNoMenuMessage('No menu categories available');
             return;
         }
 
         const totalDishes = Object.values(newMenuData.dishes).reduce((sum, dishes) => sum + dishes.length, 0);
+        console.log('Total dishes found:', totalDishes);
+        
         if (totalDishes === 0) {
+            console.warn('No dishes found');
             showNoMenuMessage('No dishes available');
             return;
         }
