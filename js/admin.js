@@ -176,41 +176,77 @@ let currentCategory = '';
 function showAddDishModal(category) {
     currentCategory = category;
     const modal = new bootstrap.Modal(document.getElementById('addDishModal'));
+    // Clear previous form data
+    document.getElementById('dishName').value = '';
+    document.getElementById('dishPrice').value = '';
+    document.getElementById('dishDescription').value = '';
+    document.getElementById('dishImage').value = '';
     modal.show();
 }
 
 function addDish() {
-    const name = document.getElementById('dishName').value.trim();
-    const price = document.getElementById('dishPrice').value;
-    const description = document.getElementById('dishDescription').value.trim();
-    const imageUrl = document.getElementById('dishImage').value.trim();
-    
-    console.log('Adding dish:', { name, price, description, imageUrl, category: currentCategory });
-    
-    if (name && price && description) {
+    try {
+        // Get form values
+        const name = document.getElementById('dishName').value.trim();
+        const price = parseFloat(document.getElementById('dishPrice').value);
+        const description = document.getElementById('dishDescription').value.trim();
+        const imageUrl = document.getElementById('dishImage').value.trim();
+
+        console.log('Adding dish:', { name, price, description, imageUrl, category: currentCategory });
+
+        // Validate inputs
+        if (!name) {
+            alert('Please enter a dish name');
+            return;
+        }
+        if (isNaN(price) || price <= 0) {
+            alert('Please enter a valid price');
+            return;
+        }
+        if (!description) {
+            alert('Please enter a dish description');
+            return;
+        }
+
+        // Check if category exists
+        if (!currentCategory || !menuData.dishes[currentCategory]) {
+            console.error('Invalid category:', currentCategory);
+            alert('Error: Invalid category selected');
+            return;
+        }
+
+        // Check for duplicate dish names in the category
+        if (menuData.dishes[currentCategory].some(dish => dish.name === name)) {
+            alert('A dish with this name already exists in this category');
+            return;
+        }
+
+        // Create dish object
         const dish = {
             name,
-            price: parseFloat(price),
+            price,
             description,
             imageUrl: imageUrl || 'https://via.placeholder.com/300x200'
         };
-        
-        if (!menuData.dishes[currentCategory]) {
-            menuData.dishes[currentCategory] = [];
-        }
-        
+
+        // Add dish to menu
         menuData.dishes[currentCategory].push(dish);
         console.log('Updated menu data after adding dish:', menuData);
-        
+
+        // Save and update UI
         saveData();
         renderCategories();
-        
-        // Close modal and reset form
+
+        // Close modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('addDishModal'));
         modal.hide();
-        document.getElementById('dishForm').reset();
-    } else {
-        console.log('Invalid dish data');
+
+        // Show success message
+        alert('Dish added successfully!');
+
+    } catch (error) {
+        console.error('Error adding dish:', error);
+        alert('Error adding dish. Please try again.');
     }
 }
 
