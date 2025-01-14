@@ -16,51 +16,72 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('tableNumber').textContent = tableNumber;
     }
 
-    // Load menu data from Firebase
+    // Load menu data
     loadMenuData();
+
+    // Add storage event listener to update menu when data changes
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'restaurantData') {
+            console.log('Menu data updated in another tab');
+            loadMenuData();
+        }
+    });
 });
 
-// Load menu data from Firebase
+// Load menu data from localStorage
 function loadMenuData() {
     try {
-        const menuRef = firebase.database().ref('menuData');
+        // Clear any existing data
+        menuData = null;
         
-        // Listen for changes
-        menuRef.on('value', (snapshot) => {
-            console.log('Received Firebase data update');
-            const data = snapshot.val();
-            
-            if (!data) {
-                console.log('No menu data found in Firebase');
-                showNoMenuMessage('No menu data available');
-                return;
-            }
+        // Get data from localStorage
+        const savedData = localStorage.getItem('restaurantData');
+        console.log('Loading menu data from localStorage');
+        
+        if (!savedData) {
+            console.warn('No menu data found in localStorage');
+            showNoMenuMessage('Menu data not found');
+            return;
+        }
 
-            menuData = data;
-            console.log('Loaded menu data:', menuData);
+        // Parse the saved data
+        menuData = JSON.parse(savedData);
+        
+        // Validate the data structure
+        if (!menuData || !menuData.categories || !menuData.dishes) {
+            console.error('Invalid menu data structure:', menuData);
+            showNoMenuMessage('Invalid menu data');
+            return;
+        }
 
-            if (!menuData.categories || !Array.isArray(menuData.categories)) {
-                console.log('No categories array found');
-                showNoMenuMessage('Menu structure is invalid');
-                return;
-            }
-
-            if (!menuData.dishes || typeof menuData.dishes !== 'object') {
-                console.log('No dishes object found');
-                showNoMenuMessage('Menu items are invalid');
-                return;
-            }
-
-            if (menuData.categories.length === 0) {
-                showNoMenuMessage('No menu categories available');
-                return;
-            }
-
-            renderMenu();
+        // Log the loaded data
+        console.log('Loaded menu data:', {
+            categories: menuData.categories,
+            dishesCount: Object.keys(menuData.dishes).length
         });
+
+        // Check if we have any categories
+        if (menuData.categories.length === 0) {
+            showNoMenuMessage('No menu categories available');
+            return;
+        }
+
+        // Check if we have any dishes
+        const totalDishes = Object.values(menuData.dishes).reduce((sum, dishes) => sum + dishes.length, 0);
+        if (totalDishes === 0) {
+            showNoMenuMessage('No dishes available');
+            return;
+        }
+
+        // Render the menu
+        renderMenu();
+        
+        // Update any existing cart items
+        updateCartUI();
+        
     } catch (error) {
         console.error('Error loading menu data:', error);
-        showNoMenuMessage('Error loading menu data');
+        showNoMenuMessage('Error loading menu');
     }
 }
 
@@ -86,10 +107,7 @@ function renderMenu() {
     menuContainer.innerHTML = '';
 
     menuData.categories.forEach(category => {
-        const dishes = menuData.dishes[category];
-        console.log(`Rendering category: ${category}, Dishes:`, dishes); // Debug log
-
-        if (dishes && dishes.length > 0) {
+        if (menuData.dishes[category] && menuData.dishes[category].length > 0) {
             const categorySection = document.createElement('div');
             categorySection.className = 'category-section mb-4';
             categorySection.innerHTML = `
@@ -104,7 +122,7 @@ function renderMenu() {
 
     // If no categories were rendered, show message
     if (menuContainer.children.length === 0) {
-        showNoMenuMessage();
+        showNoMenuMessage('No menu items available');
     }
 }
 

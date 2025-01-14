@@ -5,36 +5,51 @@ let menuData = {
     tables: []
 };
 
-// Initialize from Firebase
+// Initialize from localStorage if available
 function initializeData() {
     try {
-        // Get reference to menu data
-        const menuRef = firebase.database().ref('menuData');
+        const savedData = localStorage.getItem('restaurantData');
+        console.log('Loading saved data:', savedData);
         
-        // Listen for changes
-        menuRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                menuData = data;
-                console.log('Loaded menu data from Firebase:', menuData);
-                renderCategories();
-                renderTables();
-            } else {
-                console.log('No existing data found, starting fresh');
-                saveData();
-            }
-        });
+        if (savedData) {
+            menuData = JSON.parse(savedData);
+            console.log('Initialized menu data:', menuData);
+            renderCategories();
+            renderTables();
+        } else {
+            console.log('No existing data found, starting fresh');
+            saveData(); // Save initial empty state
+        }
     } catch (error) {
         console.error('Error initializing data:', error);
     }
 }
 
-// Save data to Firebase
+// Save data to localStorage
 function saveData() {
     try {
-        const menuRef = firebase.database().ref('menuData');
-        menuRef.set(menuData);
-        console.log('Saved menu data to Firebase:', menuData);
+        // Stringify with proper formatting to ensure all data is saved
+        const dataToSave = JSON.stringify({
+            categories: menuData.categories,
+            dishes: menuData.dishes,
+            tables: menuData.tables
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('restaurantData', dataToSave);
+        
+        // Verify the save
+        const savedData = localStorage.getItem('restaurantData');
+        const parsedData = JSON.parse(savedData);
+        
+        console.log('Saved menu data:', {
+            categoriesCount: parsedData.categories.length,
+            dishesCount: Object.keys(parsedData.dishes).length,
+            tablesCount: parsedData.tables.length
+        });
+        
+        // Force a storage event for other tabs
+        window.dispatchEvent(new Event('storage'));
     } catch (error) {
         console.error('Error saving data:', error);
         alert('Error saving menu data. Please try again.');
