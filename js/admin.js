@@ -14,39 +14,43 @@ function initializeData() {
         if (savedData) {
             menuData = JSON.parse(savedData);
             console.log('Initialized menu data:', menuData);
-            renderCategories();
-            renderTables();
         } else {
             console.log('No existing data found, starting fresh');
-            saveData(); // Save initial empty state
+            menuData = {
+                categories: [],
+                dishes: {},
+                tables: []
+            };
         }
+        renderCategories();
+        renderTables();
+        saveData(); // Save initial state
     } catch (error) {
         console.error('Error initializing data:', error);
+        // Reset to default state if error occurs
+        menuData = {
+            categories: [],
+            dishes: {},
+            tables: []
+        };
+        saveData();
     }
 }
 
 // Save data to localStorage
 function saveData() {
     try {
-        // Stringify with proper formatting to ensure all data is saved
-        const dataToSave = JSON.stringify({
-            categories: menuData.categories,
-            dishes: menuData.dishes,
-            tables: menuData.tables
-        });
+        console.log('Saving menu data:', menuData);
+        localStorage.setItem('restaurantData', JSON.stringify(menuData));
         
-        // Save to localStorage
-        localStorage.setItem('restaurantData', dataToSave);
-        
-        // Verify the save
+        // Verify the save was successful
         const savedData = localStorage.getItem('restaurantData');
-        const parsedData = JSON.parse(savedData);
+        if (!savedData) {
+            throw new Error('Data was not saved properly');
+        }
         
-        console.log('Saved menu data:', {
-            categoriesCount: parsedData.categories.length,
-            dishesCount: Object.keys(parsedData.dishes).length,
-            tablesCount: parsedData.tables.length
-        });
+        // Log success
+        console.log('Data saved successfully');
         
         // Force a storage event for other tabs
         window.dispatchEvent(new Event('storage'));
@@ -75,52 +79,110 @@ function getBaseUrl() {
 // Category Management
 function showAddCategoryModal() {
     const modal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
+    document.getElementById('categoryName').value = ''; // Clear previous input
     modal.show();
 }
 
 function addCategory() {
-    const categoryName = document.getElementById('categoryName').value.trim();
-    console.log('Adding category:', categoryName);
-    
-    if (categoryName && !menuData.categories.includes(categoryName)) {
+    try {
+        const categoryInput = document.getElementById('categoryName');
+        const categoryName = categoryInput.value.trim();
+        
+        console.log('Attempting to add category:', categoryName);
+        
+        // Validate input
+        if (!categoryName) {
+            alert('Please enter a category name');
+            return;
+        }
+        
+        // Check for duplicates
+        if (menuData.categories.includes(categoryName)) {
+            alert('This category already exists');
+            return;
+        }
+        
+        // Add the category
         menuData.categories.push(categoryName);
         menuData.dishes[categoryName] = [];
-        console.log('Updated menu data after adding category:', menuData);
         
+        console.log('Updated menu data:', menuData);
+        
+        // Save changes
         saveData();
+        
+        // Update UI
         renderCategories();
         
         // Close modal and reset form
         const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
         modal.hide();
-        document.getElementById('categoryForm').reset();
-    } else {
-        console.log('Invalid category name or category already exists');
+        categoryInput.value = '';
+        
+        console.log('Category added successfully');
+    } catch (error) {
+        console.error('Error adding category:', error);
+        alert('Error adding category. Please try again.');
     }
 }
 
 function renderCategories() {
-    const categoriesList = document.getElementById('categoriesList');
-    categoriesList.innerHTML = '';
-    
-    menuData.categories.forEach(category => {
-        const categoryCard = document.createElement('div');
-        categoryCard.className = 'col-md-4';
-        categoryCard.innerHTML = `
-            <div class="card category-card">
-                <div class="card-body">
-                    <h5 class="card-title">${category}</h5>
-                    <p class="card-text">${menuData.dishes[category].length} dishes</p>
-                    <button class="btn btn-primary" onclick="showAddDishModal('${category}')">Add Dish</button>
-                    <button class="btn btn-danger" onclick="deleteCategory('${category}')">Delete</button>
+    try {
+        const categoriesList = document.getElementById('categoriesList');
+        if (!categoriesList) {
+            console.error('Categories list element not found');
+            return;
+        }
+        
+        console.log('Rendering categories:', menuData.categories);
+        
+        // Clear existing content
+        categoriesList.innerHTML = '';
+        
+        // Show message if no categories
+        if (!menuData.categories || menuData.categories.length === 0) {
+            categoriesList.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        No categories added yet. Click "Add Category" to create your first category.
+                    </div>
                 </div>
-                <div class="list-group list-group-flush">
-                    ${renderDishesForCategory(category)}
+            `;
+            return;
+        }
+        
+        // Render each category
+        menuData.categories.forEach(category => {
+            const dishCount = menuData.dishes[category] ? menuData.dishes[category].length : 0;
+            const categoryCard = document.createElement('div');
+            categoryCard.className = 'col-md-4 mb-3';
+            categoryCard.innerHTML = `
+                <div class="card category-card">
+                    <div class="card-body">
+                        <h5 class="card-title">${category}</h5>
+                        <p class="card-text">${dishCount} dishes</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="showAddDishModal('${category}')">
+                                <i class="bi bi-plus-circle"></i> Add Dish
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteCategory('${category}')">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        ${renderDishesForCategory(category)}
+                    </div>
                 </div>
-            </div>
-        `;
-        categoriesList.appendChild(categoryCard);
-    });
+            `;
+            categoriesList.appendChild(categoryCard);
+        });
+        
+        console.log('Categories rendered successfully');
+    } catch (error) {
+        console.error('Error rendering categories:', error);
+        alert('Error displaying categories. Please refresh the page.');
+    }
 }
 
 function deleteCategory(category) {
