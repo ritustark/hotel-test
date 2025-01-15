@@ -9,150 +9,166 @@
     <style>
         body {
             background-color: #f8f9fa;
-            min-height: 100vh;
+            padding-bottom: 80px; /* Space for cart button */
         }
 
-        .menu-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .category-title {
-            margin: 30px 0 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #4CAF50;
-            color: #2c3e50;
-        }
-
-        .dish-card {
+        .category-tabs {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            transition: transform 0.2s;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #ddd;
         }
 
-        .dish-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .dish-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px 10px 0 0;
-        }
-
-        .dish-price {
-            color: #4CAF50;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .cart-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+        .category-tab {
+            padding: 10px 20px;
+            margin-right: 10px;
+            white-space: nowrap;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
             background: white;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            padding: 15px;
-            display: none;
         }
 
-        .cart-badge {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+        .category-tab.active {
             background: #4CAF50;
             color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            border-color: #4CAF50;
+        }
+
+        .menu-items {
+            padding: 15px;
+        }
+
+        .item-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .item-details {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .item-info {
+            flex-grow: 1;
+        }
+
+        .item-name {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .item-price {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .add-btn {
+            padding: 5px 15px;
+            border: 2px solid #4CAF50;
+            border-radius: 20px;
+            color: #4CAF50;
+            background: white;
+            font-weight: bold;
         }
 
         .quantity-control {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
         }
 
-        .quantity-btn {
-            width: 30px;
-            height: 30px;
+        .cart-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: none;
             background: #4CAF50;
             color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .table-info {
+            padding: 10px 15px;
             background: #4CAF50;
             color: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .order-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: none;
-        }
-
-        .status-waiting {
-            color: #f39c12;
-        }
-
-        .status-ready {
-            color: #4CAF50;
+            text-align: center;
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <div class="table-info">
-            <h4 class="mb-0">Table <span id="tableNumber">-</span></h4>
-        </div>
+    <!-- Table Info -->
+    <div class="table-info">
+        Table <span id="tableNumber">-</span>
+    </div>
 
-        <div class="order-status" id="orderStatus">
-            <span class="status-waiting">Order Status: Waiting</span>
-        </div>
+    <!-- Category Tabs -->
+    <div class="category-tabs" id="categoryTabs">
+        <!-- Categories will be loaded here -->
+    </div>
 
-        <div id="menuCategories">
-            <!-- Categories and dishes will be loaded here -->
-        </div>
+    <!-- Menu Items -->
+    <div class="menu-items" id="menuItems">
+        <!-- Menu items will be loaded here -->
+    </div>
 
-        <div class="cart-badge" onclick="toggleCart()">
-            <i class="bi bi-cart3"></i>
-            <span id="cartCount">0</span>
-        </div>
+    <!-- Cart Button -->
+    <button class="cart-fab" onclick="toggleCart()">
+        <i class="bi bi-cart3"></i>
+        <span class="cart-badge" id="cartCount">0</span>
+    </button>
 
-        <div class="cart-container" id="cartContainer">
-            <h5>Your Order</h5>
-            <div id="cartItems" class="mb-3">
-                <!-- Cart items will be loaded here -->
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-                <h5>Total: ₹<span id="cartTotal">0</span></h5>
-                <button class="btn btn-success" onclick="placeOrder()">Place Order</button>
+    <!-- Cart Modal -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Your Cart</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartItems">
+                        <!-- Cart items will be loaded here -->
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <h5>Total: ₹<span id="cartTotal">0</span></h5>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="placeOrder()">Place Order</button>
+                </div>
             </div>
         </div>
     </div>
