@@ -3,10 +3,16 @@ let menuData = null;
 let cart = [];
 let tableNumber = null;
 let currentCategory = null;
+let cartModal = null;
+let orderModal = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Menu page initialized');
+    
+    // Initialize Bootstrap modals
+    cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
     
     // Get table number from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -19,7 +25,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load menu data
     loadMenuData();
+
+    // Add touch event listeners for better mobile interaction
+    addTouchEventListeners();
 });
+
+// Add touch event listeners
+function addTouchEventListeners() {
+    // Prevent double-tap zoom on buttons
+    document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            // The click event will still fire
+        });
+    });
+
+    // Smooth scroll for category tabs
+    const categoryTabs = document.getElementById('categoryTabs');
+    let isScrolling = false;
+    let startX;
+    let scrollLeft;
+
+    categoryTabs.addEventListener('touchstart', (e) => {
+        isScrolling = true;
+        startX = e.touches[0].pageX - categoryTabs.offsetLeft;
+        scrollLeft = categoryTabs.scrollLeft;
+    });
+
+    categoryTabs.addEventListener('touchmove', (e) => {
+        if (!isScrolling) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - categoryTabs.offsetLeft;
+        const walk = (x - startX) * 2;
+        categoryTabs.scrollLeft = scrollLeft - walk;
+    });
+
+    categoryTabs.addEventListener('touchend', () => {
+        isScrolling = false;
+    });
+}
 
 // Load menu data from localStorage
 function loadMenuData() {
@@ -63,17 +107,34 @@ function renderCategories() {
     const categoryTabs = document.getElementById('categoryTabs');
     categoryTabs.innerHTML = menuData.categories.map(category => `
         <button class="category-tab ${category === currentCategory ? 'active' : ''}"
-                onclick="switchCategory('${category}')">
+                onclick="switchCategory('${category}')"
+                role="tab"
+                aria-selected="${category === currentCategory}">
             ${category}
         </button>
     `).join('');
+
+    // Scroll active category into view
+    const activeTab = categoryTabs.querySelector('.active');
+    if (activeTab) {
+        const scrollLeft = activeTab.offsetLeft - (categoryTabs.clientWidth - activeTab.clientWidth) / 2;
+        categoryTabs.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    }
 }
 
-// Switch category
+// Switch category with smooth transitions
 function switchCategory(category) {
-    currentCategory = category;
-    renderCategories();
-    renderMenuItems();
+    if (category === currentCategory) return;
+    
+    const menuItems = document.getElementById('menuItems');
+    menuItems.style.opacity = '0';
+    
+    setTimeout(() => {
+        currentCategory = category;
+        renderCategories();
+        renderMenuItems();
+        menuItems.style.opacity = '1';
+    }, 150);
 }
 
 // Render menu items for current category
@@ -97,14 +158,20 @@ function renderMenuItems() {
                     <div class="item-price">₹${dish.price}</div>
                 </div>
                 ${quantity === 0 ? `
-                    <button class="add-btn" onclick="updateQuantity('${currentCategory}', '${dish.name}', 1)">
+                    <button class="add-btn" 
+                            onclick="updateQuantity('${currentCategory}', '${dish.name}', 1)"
+                            aria-label="Add ${dish.name}">
                         ADD+
                     </button>
                 ` : `
                     <div class="quantity-control">
-                        <button class="btn btn-outline-success btn-sm" onclick="updateQuantity('${currentCategory}', '${dish.name}', -1)">-</button>
-                        <span>${quantity}</span>
-                        <button class="btn btn-outline-success btn-sm" onclick="updateQuantity('${currentCategory}', '${dish.name}', 1)">+</button>
+                        <button class="btn btn-outline-success btn-sm" 
+                                onclick="updateQuantity('${currentCategory}', '${dish.name}', -1)"
+                                aria-label="Decrease quantity">-</button>
+                        <span aria-label="Quantity">${quantity}</span>
+                        <button class="btn btn-outline-success btn-sm" 
+                                onclick="updateQuantity('${currentCategory}', '${dish.name}', 1)"
+                                aria-label="Increase quantity">+</button>
                     </div>
                 `}
             </div>
@@ -119,8 +186,13 @@ function getQuantityInCart(category, dishName) {
     return cartItem ? cartItem.quantity : 0;
 }
 
-// Update quantity of an item
+// Update quantity of an item with haptic feedback
 function updateQuantity(category, dishName, change) {
+    // Provide haptic feedback if available
+    if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+    }
+
     const cartItem = cart.find(item => item.category === category && item.name === dishName);
     const dish = menuData.dishes[category].find(d => d.name === dishName);
     
@@ -144,7 +216,9 @@ function updateQuantity(category, dishName, change) {
 
 // Toggle cart modal
 function toggleCart() {
-    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+    }
     cartModal.show();
 }
 
@@ -153,10 +227,20 @@ function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
     const cartCount = document.getElementById('cartCount');
     const cartTotal = document.getElementById('cartTotal');
+    const cartBadge = document.querySelector('.cart-badge');
     
     // Update cart count
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartCount.textContent = totalItems;
+    
+    // Show/hide cart badge with animation
+    cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+    if (totalItems > 0) {
+        cartBadge.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            cartBadge.style.transform = 'scale(1)';
+        }, 100);
+    }
     
     // Update cart items
     cartItems.innerHTML = cart.map(item => `
@@ -167,17 +251,24 @@ function updateCartUI() {
             </div>
             <div class="quantity-control">
                 <button class="btn btn-sm btn-outline-success" 
-                    onclick="updateQuantity('${item.category}', '${item.name}', -1)">-</button>
-                <span>${item.quantity}</span>
+                    onclick="updateQuantity('${item.category}', '${item.name}', -1)"
+                    aria-label="Decrease quantity">-</button>
+                <span aria-label="Quantity">${item.quantity}</span>
                 <button class="btn btn-sm btn-outline-success" 
-                    onclick="updateQuantity('${item.category}', '${item.name}', 1)">+</button>
+                    onclick="updateQuantity('${item.category}', '${item.name}', 1)"
+                    aria-label="Increase quantity">+</button>
             </div>
         </div>
     `).join('');
     
-    // Update total
+    // Update total with animation
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    cartTotal.textContent = total.toFixed(2);
+    const totalElement = document.getElementById('cartTotal');
+    totalElement.style.transform = 'scale(1.1)';
+    totalElement.textContent = total.toFixed(2);
+    setTimeout(() => {
+        totalElement.style.transform = 'scale(1)';
+    }, 100);
 }
 
 // Place order
@@ -200,11 +291,10 @@ function placeOrder() {
     localStorage.setItem('orders', JSON.stringify(orders));
 
     // Show confirmation
-    const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
     cartModal.hide();
-    
-    const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
-    orderModal.show();
+    setTimeout(() => {
+        orderModal.show();
+    }, 300);
 
     // Clear cart
     cart = [];
