@@ -86,9 +86,14 @@
                 <div id="menuSection" class="section active">
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                         <h1>Menu Management</h1>
-                        <button class="btn btn-primary" onclick="showAddCategoryModal()">
-                            <i class="bi bi-plus-circle"></i> Add Category
-                        </button>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="showAddCategoryModal()">
+                                <i class="bi bi-plus-circle"></i> Add Category
+                            </button>
+                            <button class="btn btn-success" onclick="confirmMenu()">
+                                <i class="bi bi-check-circle"></i> Confirm Menu
+                            </button>
+                        </div>
                     </div>
                     <div id="categoriesList" class="row">
                         <!-- Categories will be loaded here -->

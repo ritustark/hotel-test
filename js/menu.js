@@ -5,10 +5,7 @@ let tableNumber = null;
 
 // Get base URL for data sharing
 function getBaseUrl() {
-    // Get the repository name from the URL
-    const pathArray = window.location.pathname.split('/');
-    const repoName = pathArray[1]; // This will be 'hotel-look'
-    return `${window.location.protocol}//${window.location.host}/${repoName}`;
+    return 'https://ritustark.github.io/hotel-test';
 }
 
 // Initialize

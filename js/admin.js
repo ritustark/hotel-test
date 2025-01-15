@@ -7,10 +7,7 @@ let menuData = {
 
 // Get GitHub Pages base URL
 function getBaseUrl() {
-    // Get the repository name from the URL
-    const pathArray = window.location.pathname.split('/');
-    const repoName = pathArray[1]; // This will be 'hotel-look'
-    return `${window.location.protocol}//${window.location.host}/${repoName}`;
+    return 'https://ritustark.github.io/hotel-test';
 }
 
 // Initialize from localStorage if available
@@ -357,6 +354,40 @@ function generateQRCodeUrl(tableNumber) {
 // QR Code Management
 function generateAllQRCodes() {
     alert('To download QR codes:\n1. Right-click on each QR code\n2. Select "Save image as..."\n3. Save it to your computer');
+}
+
+// Add this function to handle menu confirmation
+function confirmMenu() {
+    try {
+        // Validate if menu has content
+        if (!menuData.categories || menuData.categories.length === 0) {
+            alert('Please add some categories and dishes before confirming the menu');
+            return;
+        }
+
+        let hasDishes = false;
+        for (const category of menuData.categories) {
+            if (menuData.dishes[category] && menuData.dishes[category].length > 0) {
+                hasDishes = true;
+                break;
+            }
+        }
+
+        if (!hasDishes) {
+            alert('Please add some dishes before confirming the menu');
+            return;
+        }
+
+        // Save confirmed menu
+        localStorage.setItem('confirmed-menu', JSON.stringify(menuData));
+        
+        // Redirect to confirmed menu page
+        window.location.href = 'confirmed-menu.html';
+        
+    } catch (error) {
+        console.error('Error confirming menu:', error);
+        alert('Error confirming menu. Please try again.');
+    }
 }
 
 // Initialize the application
