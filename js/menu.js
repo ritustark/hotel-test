@@ -70,36 +70,79 @@ function loadMenuData() {
     try {
         console.log('Loading menu data...');
         
-        // Get confirmed menu data
-        const confirmedMenu = localStorage.getItem('confirmed-menu');
-        if (!confirmedMenu) {
-            showMessage('Menu data not found');
+        // Try multiple storage keys in order
+        const storageKeys = [
+            'confirmed-menu',
+            'menuData',
+            'hotel-look-menu',
+            'restaurantData'
+        ];
+        
+        let menuDataString = null;
+        
+        // Try each storage key
+        for (const key of storageKeys) {
+            console.log(`Trying to load data from ${key}...`);
+            const data = localStorage.getItem(key);
+            if (data) {
+                console.log(`Found data in ${key}`);
+                menuDataString = data;
+                break;
+            }
+        }
+
+        if (!menuDataString) {
+            // If no data in localStorage, try to fetch from a shared data file
+            console.log('No data found in localStorage, checking for shared data...');
+            fetch('data/menu-data.json')
+                .then(response => response.json())
+                .then(data => {
+                    menuData = data;
+                    initializeMenu();
+                })
+                .catch(error => {
+                    console.error('Error fetching shared data:', error);
+                    showMessage('Menu data not found. Please ask staff to update.');
+                });
             return;
         }
 
         // Parse the saved data
-        menuData = JSON.parse(confirmedMenu);
-        console.log('Loaded menu data:', menuData);
+        try {
+            menuData = JSON.parse(menuDataString);
+            console.log('Successfully parsed menu data:', menuData);
+        } catch (parseError) {
+            console.error('Error parsing menu data:', parseError);
+            showMessage('Error loading menu data');
+            return;
+        }
         
         if (!menuData || !menuData.categories || !menuData.dishes) {
-            showMessage('Invalid menu data');
+            console.error('Invalid menu data structure:', menuData);
+            showMessage('Invalid menu data structure');
             return;
         }
 
-        // Set first category as current
-        if (menuData.categories.length > 0) {
-            currentCategory = menuData.categories[0];
-        }
-
-        // Render UI
-        renderCategories();
-        renderMenuItems();
-        updateCartUI();
+        // Initialize the menu
+        initializeMenu();
         
     } catch (error) {
-        console.error('Error loading menu:', error);
+        console.error('Error in loadMenuData:', error);
         showMessage('Error loading menu');
     }
+}
+
+// Initialize menu after data is loaded
+function initializeMenu() {
+    // Set first category as current if not set
+    if (menuData.categories.length > 0 && !currentCategory) {
+        currentCategory = menuData.categories[0];
+    }
+
+    // Render UI
+    renderCategories();
+    renderMenuItems();
+    updateCartUI();
 }
 
 // Render category tabs
@@ -302,16 +345,27 @@ function placeOrder() {
     renderMenuItems();
 }
 
-// Show message
+// Show message with retry option
 function showMessage(message) {
     const menuItems = document.getElementById('menuItems');
     menuItems.innerHTML = `
         <div class="alert alert-info text-center m-3">
             <h4 class="alert-heading">${message}</h4>
-            <p>Please ask the staff to update the menu.</p>
-            <button onclick="loadMenuData()" class="btn btn-outline-primary mt-3">
-                <i class="bi bi-arrow-clockwise"></i> Refresh Menu
-            </button>
+            <p class="mb-3">Please ask the staff to update the menu.</p>
+            <div class="d-flex flex-column gap-2">
+                <button onclick="loadMenuData()" class="btn btn-primary">
+                    <i class="bi bi-arrow-clockwise"></i> Retry Loading Menu
+                </button>
+                <button onclick="clearAndReload()" class="btn btn-outline-secondary">
+                    <i class="bi bi-trash"></i> Clear Cache & Reload
+                </button>
+            </div>
         </div>
     `;
+}
+
+// Clear cache and reload
+function clearAndReload() {
+    localStorage.clear();
+    window.location.reload();
 } 
