@@ -46,11 +46,20 @@ function generateQRCodes() {
         const tableQR = document.createElement('div');
         tableQR.className = 'table-qr';
         tableQR.innerHTML = `
-            <h4>Table ${i}</h4>
-            <div id="qr-${i}"></div>
-            <button class="btn btn-outline-primary mt-2" onclick="downloadQR(${i})">
-                <i class="bi bi-download"></i> Download
-            </button>
+            <div class="qr-card">
+                <h4 class="table-title">Table ${i}</h4>
+                <div id="qr-${i}" class="qr-code"></div>
+                <div class="qr-actions mt-3">
+                    <button class="btn btn-outline-primary" onclick="downloadQR(${i})">
+                        <i class="bi bi-download"></i> Download QR
+                    </button>
+                    <a href="${getBaseUrl()}/menu.html?table=${i}" 
+                       target="_blank" 
+                       class="btn btn-outline-success">
+                        <i class="bi bi-eye"></i> Preview Menu
+                    </a>
+                </div>
+            </div>
         `;
         qrCodesContainer.appendChild(tableQR);
 
@@ -106,6 +115,17 @@ function renderMenuPreview() {
     const menuPreview = document.getElementById('menuPreview');
     menuPreview.innerHTML = '';
 
+    // Add back to admin button
+    menuPreview.innerHTML = `
+        <div class="d-flex justify-content-between mb-4">
+            <h3>Menu Preview</h3>
+            <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                <i class="bi bi-arrow-left"></i> Back to Admin
+            </button>
+        </div>
+    `;
+
+    // Render categories and dishes
     menuData.categories.forEach(category => {
         if (menuData.dishes[category] && menuData.dishes[category].length > 0) {
             const categorySection = document.createElement('div');
@@ -124,11 +144,22 @@ function renderMenuPreview() {
 // Render dishes for category
 function renderDishesForCategory(category) {
     return menuData.dishes[category].map(dish => `
-        <div class="col-md-4">
+        <div class="col-md-4 mb-3">
             <div class="dish-card">
-                <h5>${dish.name}</h5>
-                <p class="text-muted">${dish.description}</p>
-                <p class="text-success">₹${dish.price}</p>
+                <div class="dish-image-container">
+                    <img src="${dish.imageUrl || 'https://via.placeholder.com/300x200'}" 
+                         alt="${dish.name}" 
+                         class="img-fluid rounded mb-2"
+                         onerror="this.src='https://via.placeholder.com/300x200'">
+                </div>
+                <h5 class="dish-title">${dish.name}</h5>
+                <p class="dish-description text-muted">${dish.description}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="dish-price text-success">₹${dish.price}</span>
+                    <button class="btn btn-sm btn-outline-success" disabled>
+                        <i class="bi bi-plus-circle"></i> ADD
+                    </button>
+                </div>
             </div>
         </div>
     `).join('');
