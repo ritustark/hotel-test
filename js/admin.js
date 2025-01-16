@@ -8,11 +8,34 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Initializing admin panel...');
         loadCategories();
         renderCategories();
+        setupEventListeners();
     } catch (error) {
         console.error('Error initializing:', error);
         showError('Failed to initialize. Please refresh the page.');
     }
 });
+
+// Set up event listeners
+function setupEventListeners() {
+    // Add item form submission
+    document.getElementById('addItemModalTemplate').addEventListener('shown.bs.modal', function () {
+        document.getElementById('itemName').focus();
+    });
+
+    document.getElementById('itemName').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('itemPrice').focus();
+        }
+    });
+
+    document.getElementById('itemPrice').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addItem();
+        }
+    });
+}
 
 // Load categories from localStorage
 function loadCategories() {
@@ -44,6 +67,11 @@ function showAddCategoryModal() {
     const modal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
     document.getElementById('categoryName').value = '';
     modal.show();
+    
+    // Focus on input after modal is shown
+    document.getElementById('addCategoryModal').addEventListener('shown.bs.modal', function () {
+        document.getElementById('categoryName').focus();
+    });
 }
 
 // Add new category
@@ -76,14 +104,15 @@ function addCategory() {
 function showAddItemModal(categoryIndex) {
     currentCategoryIndex = categoryIndex;
     
-    // Clone the template modal
-    const template = document.getElementById('addItemModalTemplate');
-    const modal = new bootstrap.Modal(template);
+    // Get the modal element
+    const modalElement = document.getElementById('addItemModalTemplate');
     
-    // Clear inputs
-    template.querySelector('#itemName').value = '';
-    template.querySelector('#itemPrice').value = '';
+    // Clear previous inputs
+    modalElement.querySelector('#itemName').value = '';
+    modalElement.querySelector('#itemPrice').value = '';
     
+    // Show modal
+    const modal = new bootstrap.Modal(modalElement);
     modal.show();
 }
 
