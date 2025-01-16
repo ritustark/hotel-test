@@ -1,166 +1,103 @@
-// Initialize
+// Initialize data structure
+let tables = [];
+
+// Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        console.log('Table management initialized');
-        initializeTableSystem();
+        console.log('Initializing table management...');
+        loadTables();
+        renderTables();
     } catch (error) {
-        console.error('Failed to initialize table system:', error);
-        showError('System initialization failed. Please refresh the page.');
+        console.error('Error initializing:', error);
+        showError('Failed to initialize. Please refresh the page.');
     }
 });
 
-// Initialize table system
-function initializeTableSystem() {
-    loadTables();
-    // Add event listeners for offline/online status
-    window.addEventListener('online', () => {
-        console.log('Connection restored');
-        loadTables();
-    });
-}
-
-// Show error message
-function showError(message) {
-    const tablesList = document.getElementById('tablesList');
-    tablesList.innerHTML = `
-        <div class="col-12">
-            <div class="alert alert-danger text-center">
-                <i class="bi bi-exclamation-circle"></i> ${message}
-            </div>
-        </div>
-    `;
-}
-
 // Get base URL for QR codes
 function getBaseUrl() {
-    // Get the repository name from the current URL
-    const pathSegments = window.location.pathname.split('/');
-    const repoName = pathSegments[1]; // This will be your repository name on GitHub Pages
-    
-    // Construct the base URL for GitHub Pages
-    return `https://${window.location.hostname}/${repoName}`;
-}
-
-// Validate table data
-function validateTableData(tables) {
-    if (!Array.isArray(tables)) return false;
-    return tables.every(table => 
-        table && 
-        typeof table.number === 'number' && 
-        typeof table.qrCode === 'string'
-    );
+    try {
+        // Get the current URL
+        const currentUrl = window.location.href;
+        console.log('Current URL:', currentUrl);
+        
+        // Remove trailing slashes and 'table-management.html'
+        const baseUrl = currentUrl.replace(/\/+$/, '').replace(/\/[^\/]+$/, '');
+        console.log('Base URL:', baseUrl);
+        
+        return baseUrl;
+    } catch (error) {
+        console.error('Error getting base URL:', error);
+        showError('Failed to generate QR code URL');
+        return '';
+    }
 }
 
 // Load tables from localStorage
 function loadTables() {
     try {
         const savedData = localStorage.getItem('tableData');
-        const tables = savedData ? JSON.parse(savedData) : [];
-        
-        if (!validateTableData(tables)) {
-            console.error('Invalid table data detected');
-            localStorage.removeItem('tableData'); // Clear invalid data
-            renderTables([]);
-            return;
+        if (savedData) {
+            tables = JSON.parse(savedData);
+            console.log('Loaded tables:', tables);
         }
-        
-        renderTables(tables);
     } catch (error) {
         console.error('Error loading tables:', error);
-        showError('Failed to load tables. Please try again.');
+        tables = [];
     }
 }
 
 // Save tables to localStorage
-function saveTables(tables) {
+function saveTables() {
     try {
-        if (!validateTableData(tables)) {
-            throw new Error('Invalid table data');
-        }
         localStorage.setItem('tableData', JSON.stringify(tables));
-        return true;
+        console.log('Saved tables:', tables);
     } catch (error) {
         console.error('Error saving tables:', error);
-        showError('Failed to save tables. Please try again.');
-        return false;
+        showError('Failed to save changes');
     }
 }
 
 // Add new table
 function addTable() {
     try {
-        const savedData = localStorage.getItem('tableData');
-        const tables = savedData ? JSON.parse(savedData) : [];
+        // Get the next table number
+        const tableNumber = tables.length > 0 ? Math.max(...tables.map(t => t.number)) + 1 : 1;
         
-        const newTable = {
-            number: tables.length + 1,
-            qrCode: `${getBaseUrl()}/menu.html?table=${tables.length + 1}`
-        };
+        // Generate QR code URL
+        const baseUrl = getBaseUrl();
+        const qrCodeUrl = `${baseUrl}/menu.html?table=${tableNumber}`;
+        console.log('Generated QR code URL:', qrCodeUrl);
         
-        tables.push(newTable);
-        saveTables(tables);
-        renderTables(tables);
+        // Add new table
+        tables.push({
+            number: tableNumber,
+            qrCode: qrCodeUrl
+        });
         
+        saveTables();
+        renderTables();
     } catch (error) {
         console.error('Error adding table:', error);
-        showError('Failed to add table. Please try again.');
+        showError('Failed to add table');
     }
 }
 
 // Delete table
-function deleteTable(tableNumber) {
-    if (confirm(`Delete Table ${tableNumber}?`)) {
-        try {
-            const savedData = localStorage.getItem('tableData');
-            let tables = savedData ? JSON.parse(savedData) : [];
-            
-            tables = tables.filter(table => table.number !== tableNumber);
-            
-            // Renumber remaining tables
-            tables.forEach((table, index) => {
-                table.number = index + 1;
-                table.qrCode = `${getBaseUrl()}/menu.html?table=${index + 1}`;
-            });
-            
-            saveTables(tables);
-            renderTables(tables);
-            
-        } catch (error) {
-            console.error('Error deleting table:', error);
-            showError('Failed to delete table. Please try again.');
-        }
-    }
-}
-
-// Generate QR codes for all tables
-function generateQRCodes() {
+function deleteTable(index) {
     try {
-        const savedData = localStorage.getItem('tableData');
-        const tables = savedData ? JSON.parse(savedData) : [];
-        
-        if (tables.length === 0) {
-            alert('Please add some tables first');
-            return;
+        if (confirm(`Are you sure you want to delete Table ${tables[index].number}?`)) {
+            tables.splice(index, 1);
+            saveTables();
+            renderTables();
         }
-        
-        // Check if menu data exists
-        const menuData = localStorage.getItem('menuData');
-        if (!menuData) {
-            alert('Please configure the menu first in the Admin Panel');
-            return;
-        }
-        
-        // Redirect to QR codes page
-        window.location.href = 'qr-codes.html';
-        
     } catch (error) {
-        console.error('Error generating QR codes:', error);
-        showError('Failed to generate QR codes. Please try again.');
+        console.error('Error deleting table:', error);
+        showError('Failed to delete table');
     }
 }
 
 // Render tables
-function renderTables(tables) {
+function renderTables() {
     const tablesList = document.getElementById('tablesList');
     
     if (!tables || tables.length === 0) {
@@ -177,21 +114,19 @@ function renderTables(tables) {
     // Create document fragment for better performance
     const fragment = document.createDocumentFragment();
     
-    tables.forEach(table => {
-        const tableCol = document.createElement('div');
-        tableCol.className = 'col-md-4 mb-3';
-        tableCol.innerHTML = `
+    tables.forEach((table, index) => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4 mb-4';
+        col.innerHTML = `
             <div class="table-card">
                 <div class="table-number">Table ${table.number}</div>
                 <div id="qr-${table.number}" class="qr-code"></div>
-                <div class="mt-3">
-                    <button class="btn btn-outline-danger" onclick="deleteTable(${table.number})">
-                        <i class="bi bi-trash"></i> Delete Table
-                    </button>
-                </div>
+                <button class="btn btn-danger mt-3" onclick="deleteTable(${index})">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
             </div>
         `;
-        fragment.appendChild(tableCol);
+        fragment.appendChild(col);
     });
     
     tablesList.innerHTML = '';
@@ -208,4 +143,30 @@ function renderTables(tables) {
             });
         });
     });
+}
+
+// Generate QR codes page
+function generateQRCodes() {
+    try {
+        if (!tables || tables.length === 0) {
+            alert('Please add some tables first');
+            return;
+        }
+        
+        window.location.href = 'qr-codes.html';
+    } catch (error) {
+        console.error('Error generating QR codes:', error);
+        showError('Failed to generate QR codes');
+    }
+}
+
+// Show error message
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+    errorDiv.innerHTML = `
+        <i class="bi bi-exclamation-circle"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').prepend(errorDiv);
 } 
