@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Restaurant Admin Panel</title>
+    <title>Restaurant Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
@@ -14,162 +14,149 @@
 
         body {
             background-color: #f8f9fa;
-            padding-bottom: 60px;
-            max-width: 100vw;
-            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
             background: var(--primary-color);
             color: white;
-            padding: 15px;
+            padding: 20px 0;
             text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
         }
 
-        .admin-menu {
-            padding: 15px;
-            max-width: 600px;
-            margin: 0 auto;
+        .container {
+            flex: 1;
+            max-width: 800px;
+            padding: 0 15px;
         }
 
-        .menu-button {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: none;
-            border-radius: 10px;
+        .menu-card {
             background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            text-align: left;
-            font-size: 1.1rem;
+            text-align: center;
             transition: transform 0.2s;
         }
 
-        .menu-button:active {
-            transform: scale(0.98);
+        .menu-card:hover {
+            transform: translateY(-5px);
         }
 
-        .menu-button i {
-            margin-right: 15px;
-            font-size: 1.4rem;
+        .menu-icon {
+            font-size: 2.5rem;
             color: var(--primary-color);
-        }
-
-        .category-section {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
         }
 
-        .category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .menu-title {
+            font-size: 1.2rem;
             margin-bottom: 15px;
+            color: #333;
         }
 
-        .dish-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
+        .menu-description {
+            color: #666;
+            margin-bottom: 20px;
         }
 
-        .dish-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .dish-price {
-            color: var(--primary-color);
-            font-weight: bold;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn-group .btn {
-            flex: 1;
-        }
-
-        .modal-content {
-            border-radius: 15px;
-        }
-
-        .modal-header {
+        .btn-primary {
             background: var(--primary-color);
-            color: white;
-            border-radius: 15px 15px 0 0;
+            border-color: var(--primary-color);
+            padding: 10px 20px;
         }
 
-        .modal-footer {
-            border-top: none;
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+            text-align: center;
         }
 
         @media (max-width: 576px) {
             .header {
-                padding: 12px;
-                font-size: 1.2rem;
+                padding: 15px 0;
+                margin-bottom: 20px;
             }
 
-            .admin-menu {
-                padding: 10px;
-            }
-
-            .menu-button {
-                padding: 12px;
-                font-size: 1rem;
-            }
-
-            .menu-button i {
-                font-size: 1.2rem;
-            }
-
-            .modal-dialog {
-                margin: 10px;
+            .menu-card {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1 class="mb-0">Restaurant Admin Panel</h1>
+        <h1 class="mb-0">Restaurant Management System</h1>
     </div>
 
-    <div class="admin-menu">
-        <button class="menu-button" onclick="window.location.href='menu-management.html'">
-            <i class="bi bi-list"></i>
-            Menu Management
-        </button>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="menu-card">
+                    <div class="menu-icon">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <h2 class="menu-title">Admin Panel</h2>
+                    <p class="menu-description">Manage menu categories and items</p>
+                    <a href="admin.html" class="btn btn-primary">
+                        <i class="bi bi-arrow-right"></i> Go to Admin Panel
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="menu-card">
+                    <div class="menu-icon">
+                        <i class="bi bi-table"></i>
+                    </div>
+                    <h2 class="menu-title">Table Management</h2>
+                    <p class="menu-description">Manage tables and QR codes</p>
+                    <a href="table-management.html" class="btn btn-primary">
+                        <i class="bi bi-arrow-right"></i> Manage Tables
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="menu-card">
+                    <div class="menu-icon">
+                        <i class="bi bi-cart"></i>
+                    </div>
+                    <h2 class="menu-title">Orders</h2>
+                    <p class="menu-description">View and manage customer orders</p>
+                    <a href="orders.html" class="btn btn-primary">
+                        <i class="bi bi-arrow-right"></i> View Orders
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="menu-card">
+                    <div class="menu-icon">
+                        <i class="bi bi-qr-code"></i>
+                    </div>
+                    <h2 class="menu-title">QR Codes</h2>
+                    <p class="menu-description">Generate and manage QR codes</p>
+                    <a href="qr-codes.html" class="btn btn-primary">
+                        <i class="bi bi-arrow-right"></i> Manage QR Codes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <button class="menu-button" onclick="window.location.href='table-management.html'">
-            <i class="bi bi-grid"></i>
-            Table Management
-        </button>
-
-        <button class="menu-button" onclick="window.location.href='qr-codes.html'">
-            <i class="bi bi-qr-code"></i>
-            QR Codes
-        </button>
-
-        <button class="menu-button" onclick="window.location.href='orders.html'">
-            <i class="bi bi-cart"></i>
-            Orders
-        </button>
+    <div class="footer">
+        <p class="mb-0">© 2024 Restaurant Management System. All rights reserved.</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/admin.js"></script>
 </body>
 </html>
