@@ -19,7 +19,7 @@ function initializeTableSystem() {
     });
 }
 
-// Enhanced error handling and user feedback
+// Show error message
 function showError(message) {
     const tablesList = document.getElementById('tablesList');
     tablesList.innerHTML = `
@@ -31,7 +31,17 @@ function showError(message) {
     `;
 }
 
-// Improved table data validation
+// Get base URL for QR codes
+function getBaseUrl() {
+    // Get the repository name from the current URL
+    const pathSegments = window.location.pathname.split('/');
+    const repoName = pathSegments[1]; // This will be your repository name on GitHub Pages
+    
+    // Construct the base URL for GitHub Pages
+    return `https://${window.location.hostname}/${repoName}`;
+}
+
+// Validate table data
 function validateTableData(tables) {
     if (!Array.isArray(tables)) return false;
     return tables.every(table => 
@@ -39,15 +49,6 @@ function validateTableData(tables) {
         typeof table.number === 'number' && 
         typeof table.qrCode === 'string'
     );
-}
-
-// Get base URL for QR codes
-function getBaseUrl() {
-    // Get the current URL and remove any trailing slashes
-    const currentUrl = window.location.href.replace(/\/+$/, '');
-    // Remove the current page name from the URL to get the base URL
-    const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-    return baseUrl;
 }
 
 // Load tables from localStorage
@@ -102,7 +103,7 @@ function addTable() {
         
     } catch (error) {
         console.error('Error adding table:', error);
-        alert('Error adding table');
+        showError('Failed to add table. Please try again.');
     }
 }
 
@@ -126,7 +127,7 @@ function deleteTable(tableNumber) {
             
         } catch (error) {
             console.error('Error deleting table:', error);
-            alert('Error deleting table');
+            showError('Failed to delete table. Please try again.');
         }
     }
 }
@@ -142,12 +143,19 @@ function generateQRCodes() {
             return;
         }
         
+        // Check if menu data exists
+        const menuData = localStorage.getItem('menuData');
+        if (!menuData) {
+            alert('Please configure the menu first in the Admin Panel');
+            return;
+        }
+        
         // Redirect to QR codes page
         window.location.href = 'qr-codes.html';
         
     } catch (error) {
         console.error('Error generating QR codes:', error);
-        alert('Error generating QR codes');
+        showError('Failed to generate QR codes. Please try again.');
     }
 }
 
