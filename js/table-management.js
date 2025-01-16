@@ -43,7 +43,11 @@ function validateTableData(tables) {
 
 // Get base URL for QR codes
 function getBaseUrl() {
-    return 'https://ritustark.github.io/hotel-test';
+    // Get the current URL and remove any trailing slashes
+    const currentUrl = window.location.href.replace(/\/+$/, '');
+    // Remove the current page name from the URL to get the base URL
+    const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+    return baseUrl;
 }
 
 // Load tables from localStorage

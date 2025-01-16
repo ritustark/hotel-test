@@ -12,311 +12,267 @@
             --secondary-color: #45a049;
         }
 
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-
         body {
             background-color: #f8f9fa;
-            padding-bottom: 100px;
-            max-width: 100vw;
-            overflow-x: hidden;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
+            padding-bottom: 80px;
         }
 
-        .table-info {
-            padding: 12px 15px;
+        .header {
             background: var(--primary-color);
             color: white;
-            text-align: center;
-            font-size: 1.1rem;
+            padding: 15px;
             position: sticky;
             top: 0;
-            z-index: 1001;
+            z-index: 1000;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .category-tabs {
-            display: flex;
-            overflow-x: auto;
-            padding: 12px;
-            background: white;
-            position: sticky;
-            top: 45px;
-            z-index: 1000;
-            border-bottom: 1px solid #ddd;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-        }
-
-        .category-tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .category-tab {
-            padding: 8px 16px;
-            margin-right: 8px;
-            white-space: nowrap;
-            border: 1.5px solid #ddd;
-            border-radius: 20px;
-            cursor: pointer;
-            background: white;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-
-        .category-tab:active {
-            transform: scale(0.95);
-        }
-
-        .category-tab.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .menu-items {
-            padding: 12px;
-        }
-
-        .item-card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 12px;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        }
-
-        .item-details {
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
         }
 
-        .item-info {
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .menu-category {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .category-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-details {
             flex-grow: 1;
-            min-width: 0;
         }
 
         .item-name {
-            font-size: 1rem;
-            margin-bottom: 4px;
             font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            margin-bottom: 5px;
         }
 
         .item-price {
             color: var(--primary-color);
-            font-weight: bold;
-            font-size: 0.95rem;
-        }
-
-        .add-btn {
-            padding: 6px 16px;
-            border: 2px solid var(--primary-color);
-            border-radius: 20px;
-            color: var(--primary-color);
-            background: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-            min-width: 80px;
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-
-        .add-btn:active {
-            background: var(--primary-color);
-            color: white;
+            font-weight: 500;
         }
 
         .quantity-control {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .quantity-control button {
-            width: 32px;
-            height: 32px;
-            padding: 0;
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary-color);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            touch-action: manipulation;
+            font-size: 1.2rem;
+            cursor: pointer;
         }
 
-        .quantity-control span {
-            min-width: 20px;
+        .quantity-display {
+            min-width: 30px;
             text-align: center;
-            font-weight: 500;
         }
 
-        .cart-fab {
+        .cart-button {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
             background: var(--primary-color);
             color: white;
             border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
             box-shadow: 0 3px 12px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            transition: transform 0.2s ease;
-            z-index: 1002;
+            gap: 10px;
         }
 
-        .cart-fab:active {
-            transform: scale(0.95);
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #dc3545;
-            color: white;
+        .cart-count {
+            background: white;
+            color: var(--primary-color);
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 0.8rem;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid white;
+            font-weight: 500;
         }
 
-        .modal-content {
-            border-radius: 16px;
-        }
-
-        .modal-header {
-            border-bottom: 1px solid #eee;
-            padding: 15px 20px;
-        }
-
-        .modal-body {
-            padding: 20px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .modal-footer {
-            border-top: 1px solid #eee;
-            padding: 15px 20px;
-        }
-
-        .btn-success {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .btn-success:hover, .btn-success:active {
-            background: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        @media (max-width: 360px) {
-            .item-name {
-                font-size: 0.95rem;
-            }
-            
-            .item-price {
-                font-size: 0.9rem;
+        @media (max-width: 576px) {
+            .header {
+                padding: 12px;
             }
 
-            .add-btn {
-                padding: 5px 12px;
-                min-width: 70px;
-                font-size: 0.85rem;
-            }
-
-            .quantity-control button {
-                width: 28px;
-                height: 28px;
+            .menu-item {
+                padding: 12px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Table Info -->
-    <div class="table-info">
-        Table <span id="tableNumber">-</span>
+    <div class="header">
+        <div class="header-content">
+            <h1 class="mb-0" style="font-size: 1.2rem;">Table <span id="tableNumber"></span></h1>
+            <div id="cartInfo" style="display: none;">
+                Items: <span id="cartCount">0</span>
+            </div>
+        </div>
     </div>
 
-    <!-- Category Tabs -->
-    <div class="category-tabs" id="categoryTabs">
-        <!-- Categories will be loaded here -->
+    <div class="container">
+        <div id="menuContent">
+            <!-- Menu categories and items will be loaded here -->
+        </div>
     </div>
 
-    <!-- Menu Items -->
-    <div class="menu-items" id="menuItems">
-        <!-- Menu items will be loaded here -->
-    </div>
-
-    <!-- Cart Button -->
-    <button class="cart-fab" onclick="toggleCart()">
-        <i class="bi bi-cart3"></i>
-        <span class="cart-badge" id="cartCount">0</span>
+    <button id="viewCart" class="cart-button" style="display: none;">
+        <i class="bi bi-cart"></i>
+        View Cart
+        <span class="cart-count">0</span>
     </button>
 
-    <!-- Cart Modal -->
-    <div class="modal fade" id="cartModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Your Cart</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="cartItems">
-                        <!-- Cart items will be loaded here -->
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                        <h5 class="mb-0">Total:</h5>
-                        <h5 class="mb-0 text-success">₹<span id="cartTotal">0</span></h5>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success" onclick="placeOrder()">Place Order</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Order Confirmation Modal -->
-    <div class="modal fade" id="orderModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Order Confirmation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center py-4">
-                    <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
-                    <h4 class="mt-3">Order Placed Successfully!</h4>
-                    <p class="text-muted mb-0">Please wait while we prepare your food.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/menu.js"></script>
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                initializeMenu();
+            } catch (error) {
+                console.error('Failed to initialize menu:', error);
+                showError('Failed to load menu. Please try again.');
+            }
+        });
+
+        // Initialize menu
+        function initializeMenu() {
+            // Get table number from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableNumber = urlParams.get('table');
+            
+            if (!tableNumber) {
+                showError('Invalid table number');
+                return;
+            }
+            
+            // Display table number
+            document.getElementById('tableNumber').textContent = tableNumber;
+            
+            // Load menu data
+            loadMenuData();
+        }
+
+        // Load menu data from localStorage
+        function loadMenuData() {
+            try {
+                const menuData = JSON.parse(localStorage.getItem('menuData'));
+                if (!menuData || !Array.isArray(menuData.categories)) {
+                    showError('Menu data not found');
+                    return;
+                }
+                renderMenu(menuData.categories);
+            } catch (error) {
+                console.error('Error loading menu data:', error);
+                showError('Failed to load menu data');
+            }
+        }
+
+        // Render menu
+        function renderMenu(categories) {
+            const menuContent = document.getElementById('menuContent');
+            
+            if (!categories || categories.length === 0) {
+                showError('No menu items available');
+                return;
+            }
+            
+            menuContent.innerHTML = categories.map(category => `
+                <div class="menu-category">
+                    <div class="category-header">
+                        <h2 class="mb-0" style="font-size: 1.2rem;">${category.name}</h2>
+                    </div>
+                    ${category.items.map(item => `
+                        <div class="menu-item">
+                            <div class="item-details">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-price">₹${item.price}</div>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                                <span class="quantity-display" id="quantity-${item.id}">0</span>
+                                <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+            
+            // Show cart button
+            document.getElementById('viewCart').style.display = 'flex';
+            document.getElementById('cartInfo').style.display = 'block';
+        }
+
+        // Update item quantity
+        function updateQuantity(itemId, change) {
+            const quantityElement = document.getElementById(`quantity-${itemId}`);
+            let quantity = parseInt(quantityElement.textContent) + change;
+            quantity = Math.max(0, quantity); // Prevent negative quantities
+            quantityElement.textContent = quantity;
+            updateCart();
+        }
+
+        // Update cart
+        function updateCart() {
+            const cartCount = Array.from(document.getElementsByClassName('quantity-display'))
+                .reduce((total, element) => total + parseInt(element.textContent), 0);
+            
+            document.querySelector('.cart-count').textContent = cartCount;
+            document.getElementById('cartCount').textContent = cartCount;
+        }
+
+        // Show error message
+        function showError(message) {
+            const menuContent = document.getElementById('menuContent');
+            menuContent.innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-circle"></i> ${message}
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html> 

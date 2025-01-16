@@ -359,30 +359,30 @@ function generateAllQRCodes() {
 // Add this function to handle menu confirmation
 function confirmMenu() {
     try {
-        // Validate if menu has content
-        if (!menuData.categories || menuData.categories.length === 0) {
-            alert('Please add some categories and dishes before confirming the menu');
-            return;
-        }
-
-        let hasDishes = false;
-        for (const category of menuData.categories) {
-            if (menuData.dishes[category] && menuData.dishes[category].length > 0) {
-                hasDishes = true;
-                break;
-            }
-        }
-
-        if (!hasDishes) {
-            alert('Please add some dishes before confirming the menu');
-            return;
-        }
-
-        // Save confirmed menu
-        localStorage.setItem('confirmed-menu', JSON.stringify(menuData));
+        const categories = JSON.parse(localStorage.getItem('categories') || '[]');
         
-        // Redirect to confirmed menu page
-        window.location.href = 'confirmed-menu.html';
+        if (!categories || categories.length === 0) {
+            alert('Please add some menu items first');
+            return;
+        }
+        
+        // Save menu data in a format suitable for the menu page
+        const menuData = {
+            categories: categories.map(category => ({
+                name: category.name,
+                items: category.items.map((item, index) => ({
+                    id: `${category.name.toLowerCase()}-${index}`,
+                    name: item.name,
+                    price: item.price
+                }))
+            }))
+        };
+        
+        // Save menu data
+        localStorage.setItem('menuData', JSON.stringify(menuData));
+        
+        // Redirect to table management
+        window.location.href = 'table-management.html';
         
     } catch (error) {
         console.error('Error confirming menu:', error);
